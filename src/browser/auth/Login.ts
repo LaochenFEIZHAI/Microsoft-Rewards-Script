@@ -605,7 +605,11 @@ export class Login {
                 }
 
                 const u = new URL(page.url())
-                const atBingHome = u.hostname === 'www.bing.com' && u.pathname === '/'
+
+                // Support all Bing regional domains (www.bing.com, cn.bing.com, etc.)
+                const isBingDomain = u.hostname === 'bing.com' || u.hostname.endsWith('.bing.com')
+                const atBingHome = isBingDomain && u.pathname === '/'
+
                 this.bot.logger.debug(
                     this.bot.isMobile,
                     'LOGIN-BING',
@@ -629,6 +633,23 @@ export class Login {
                 }
 
                 await this.bot.utils.wait(1000)
+            }
+
+            // Fallback: verify via cookies if DOM verification failed
+            this.bot.logger.debug(this.bot.isMobile, 'LOGIN-BING', 'DOM verification failed, checking cookies')
+            const context = page.context()
+            const cookies = await context.cookies()
+            const bingCookies = cookies.filter(
+                c => c.domain.includes('bing.com') && ['_U', 'SRCHD', 'SRCHUID', 'SRCHUSR'].includes(c.name)
+            )
+
+            if (bingCookies.length >= 3) {
+                this.bot.logger.info(
+                    this.bot.isMobile,
+                    'LOGIN-BING',
+                    `Bing session verified via cookies (${bingCookies.length}/4 found)`
+                )
+                return
             }
 
             this.bot.logger.warn(this.bot.isMobile, 'LOGIN-BING', 'Could not verify Bing session, continuing anyway')
