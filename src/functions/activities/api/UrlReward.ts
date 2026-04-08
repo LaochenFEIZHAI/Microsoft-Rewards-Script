@@ -46,16 +46,22 @@ export class UrlReward extends Workers {
                 `Prepared UrlReward headers | offerId=${offerId} | cookieLength=${this.cookieHeader.length} | fingerprintHeaderKeys=${Object.keys(this.fingerprintHeader).length}`
             )
 
-            const formData = new URLSearchParams({
+            const formDataObj: { [key: string]: string } = {
                 id: offerId,
                 hash: promotion.hash,
                 timeZone: '60',
                 activityAmount: '1',
                 dbs: '0',
                 form: '',
-                type: '',
-                __RequestVerificationToken: this.bot.requestToken
-            })
+                type: ''
+            }
+
+            // Only add RequestVerificationToken for legacy dashboard
+            if (this.bot.requestToken) {
+                formDataObj['__RequestVerificationToken'] = this.bot.requestToken
+            }
+
+            const formData = new URLSearchParams(formDataObj)
 
             this.bot.logger.debug(
                 this.bot.isMobile,

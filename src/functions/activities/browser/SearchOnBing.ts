@@ -185,16 +185,22 @@ export class SearchOnBing extends Workers {
                 `Preparing activation request | offerId=${promotion.offerId} | hash=${promotion.hash}`
             )
 
-            const formData = new URLSearchParams({
+            const formDataObj: { [key: string]: string } = {
                 id: promotion.offerId,
                 hash: promotion.hash,
                 timeZone: '60',
                 activityAmount: '1',
                 dbs: '0',
                 form: '',
-                type: '',
-                __RequestVerificationToken: this.bot.requestToken
-            })
+                type: ''
+            }
+
+            // Only add RequestVerificationToken for legacy dashboard
+            if (this.bot.requestToken) {
+                formDataObj['__RequestVerificationToken'] = this.bot.requestToken
+            }
+
+            const formData = new URLSearchParams(formDataObj)
 
             const request: AxiosRequestConfig = {
                 url: 'https://rewards.bing.com/api/reportactivity?X-Requested-With=XMLHttpRequest',

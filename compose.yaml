@@ -1,6 +1,6 @@
 services:
     microsoft-rewards-script:
-        image: ghcr.io/thenetsky/microsoft-rewards-script:latest
+        image: ghcr.io/laochenfeizhai/microsoft-rewards-script:3.1.4
         container_name: microsoft-rewards-script
         restart: unless-stopped
         volumes:

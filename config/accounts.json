@@ -1,0 +1,21 @@
+[
+  {
+    "email": "yypgame@outlook.com",
+    "password": "2005313yypYYP",
+    "totpSecret": "",
+    "recoveryEmail": "",
+    "geoLocale": "auto",
+    "langCode": "en",
+    "proxy": {
+      "proxyAxios": false,
+      "url": "",
+      "port": 0,
+      "username": "",
+      "password": ""
+    },
+    "saveFingerprint": {
+      "mobile": false,
+      "desktop": false
+    }
+  }
+]

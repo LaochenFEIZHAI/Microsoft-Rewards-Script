@@ -678,7 +678,10 @@ export class Login {
                 this.bot.logger.debug(this.bot.isMobile, 'GET-REWARD-SESSION', `Token fetch loop ${i + 1}/${loopMax}`)
 
                 const u = new URL(page.url())
-                const atRewardHome = u.hostname === 'rewards.bing.com' && u.pathname === '/'
+
+                // Allow both / and /dashboard paths for rewards home
+                const atRewardHome =
+                    u.hostname === 'rewards.bing.com' && (u.pathname === '/' || u.pathname === '/dashboard')
 
                 if (atRewardHome) {
                     await this.bot.browser.utils.tryDismissAllMessages(page)
@@ -692,17 +695,13 @@ export class Login {
                     if (isModernDashboard) {
                         this.bot.rewardsVersion = 'modern'
 
-                        this.bot.logger.warn(
+                        this.bot.logger.info(
                             this.bot.isMobile,
                             'GET-REWARD-SESSION',
-                            'Modern Rewards dashboard detected. This script version may not fully support it.'
+                            'Modern Rewards dashboard detected. RequestToken disabled (expected behavior).'
                         )
 
-                        this.bot.logger.warn(
-                            this.bot.isMobile,
-                            'GET-REWARD-SESSION',
-                            'RequestToken disabled for this session (expected behavior).'
-                        )
+                        return // Modern dashboard doesn't need requestToken
                     }
 
                     const token =
