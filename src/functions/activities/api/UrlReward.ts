@@ -126,10 +126,13 @@ export class UrlReward extends Workers {
 
             await this.bot.utils.wait(this.bot.utils.randomDelay(5000, 10000))
         } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : String(error)
+            const responseData = (error as any)?.response?.data
+
             this.bot.logger.error(
                 this.bot.isMobile,
                 'URL-REWARD',
-                `Error in doUrlReward | offerId=${promotion.offerId} | message=${error instanceof Error ? error.message : String(error)}`
+                `Error in doUrlReward | offerId=${offerId} | message=${errorMsg}${responseData ? ` | response=${JSON.stringify(responseData).substring(0, 200)}` : ''}`
             )
         }
     }
