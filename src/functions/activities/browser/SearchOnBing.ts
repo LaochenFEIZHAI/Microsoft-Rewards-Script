@@ -179,6 +179,51 @@ export class SearchOnBing extends Workers {
     // The task needs to be activated before being able to complete it
     private async activateSearchTask(promotion: BasePromotion): Promise<boolean> {
         try {
+            // For Modern Dashboard, skip API activation and use browser-based approach
+            if (this.bot.rewardsVersion === 'modern') {
+                this.bot.logger.info(
+                    this.bot.isMobile,
+                    'SEARCH-ON-BING-ACTIVATE',
+                    `Modern Dashboard detected, skipping API activation | offerId=${promotion.offerId}`
+                )
+
+                // Navigate to destinationUrl if available to "activate" the activity
+                if (promotion.destinationUrl) {
+                    this.bot.logger.debug(
+                        this.bot.isMobile,
+                        'SEARCH-ON-BING-ACTIVATE',
+                        `Navigating to activity destination | url=${promotion.destinationUrl}`
+                    )
+
+                    // Visit the destination URL to trigger activity tracking
+                    await this.bot.mainMobilePage
+                        .goto(promotion.destinationUrl, {
+                            waitUntil: 'domcontentloaded',
+                            timeout: 15000
+                        })
+                        .catch(() => {})
+
+                    await this.bot.utils.wait(2000)
+
+                    // Return to rewards page
+                    await this.bot.mainMobilePage
+                        .goto(this.bot.config.baseURL, {
+                            waitUntil: 'domcontentloaded',
+                            timeout: 10000
+                        })
+                        .catch(() => {})
+
+                    this.bot.logger.info(
+                        this.bot.isMobile,
+                        'SEARCH-ON-BING-ACTIVATE',
+                        `Browser-based activation completed | offerId=${promotion.offerId}`
+                    )
+                }
+
+                return true // Always return true for Modern Dashboard
+            }
+
+            // Legacy Dashboard: use API activation
             this.bot.logger.debug(
                 this.bot.isMobile,
                 'SEARCH-ON-BING-ACTIVATE',

@@ -50,6 +50,13 @@ export class Workers {
                 if (x.exclusiveLockedFeatureStatus === 'locked') return false
                 if (!x.promotionType) return false
 
+                // Log offerId pattern for debugging
+                this.bot.logger.debug(
+                    this.bot.isMobile,
+                    'MORE-PROMOTIONS',
+                    `Filtering activity | offerId=${x.offerId} | complete=${x.complete} | points=${x.pointProgress}/${x.pointProgressMax} | locked=${x.exclusiveLockedFeatureStatus}`
+                )
+
                 return true
             }) ?? []
 
