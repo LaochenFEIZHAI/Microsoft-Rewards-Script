@@ -38,6 +38,11 @@ export class DailySetBrowser extends Workers {
         await this.bot.utils.wait(5000)
         await this.bot.browser.utils.tryDismissAllMessages(page).catch(() => {})
 
+        // Click "Earn more" button to expand all Daily Set activities
+        await this.clickEarnMoreButton(page)
+
+        await this.bot.utils.wait(3000)
+
         // Find Daily Set activity links on the page
         const dailySetLinks = await this.findDailySetLinks(page)
 
@@ -98,6 +103,95 @@ export class DailySetBrowser extends Workers {
 
         this.bot.userData.currentPoints = newBalance
         this.bot.userData.gainedPoints = (this.bot.userData.gainedPoints ?? 0) + gainedPoints
+    }
+
+    private async clickEarnMoreButton(page: Page) {
+        try {
+            this.bot.logger.debug(this.bot.isMobile, 'DAILY-SET-BROWSER', 'Looking for "Earn more" button')
+
+            // Try multiple selectors for the "Earn more" button/link
+            const earnMoreSelectors = [
+                'a[href="/earn"]',
+                'a[href*="/earn"]',
+                'a:has-text("Earn more")',
+                'button:has-text("Earn more")',
+                '[aria-label*="Earn more"]',
+                'a:text-is("Earn more")'
+            ]
+
+            for (const selector of earnMoreSelectors) {
+                try {
+                    const element = page.locator(selector).first()
+
+                    if (await element.isVisible({ timeout: 2000 })) {
+                        this.bot.logger.info(
+                            this.bot.isMobile,
+                            'DAILY-SET-BROWSER',
+                            'Clicking "Earn more" button to expand Daily Set activities'
+                        )
+
+                        await element.click({ timeout: 5000 })
+
+                        // Wait for content to expand
+                        await this.bot.utils.wait(3000)
+
+                        this.bot.logger.debug(
+                            this.bot.isMobile,
+                            'DAILY-SET-BROWSER',
+                            '"Earn more" clicked, waiting for activities to expand'
+                        )
+
+                        return
+                    }
+                } catch (e) {
+                    // Continue to next selector
+                }
+            }
+
+            // If no selector worked, try to find by text content
+            const earnMoreByText = await page.evaluate(() => {
+                const allLinks = Array.from(document.querySelectorAll('a, button'))
+                const earnMoreElement = allLinks.find(el => {
+                    const text = (el.textContent || '').toLowerCase().trim()
+                    return text === 'earn more' || text.includes('earn more')
+                })
+
+                return earnMoreElement
+                    ? {
+                          found: true,
+                          tagName: earnMoreElement.tagName,
+                          className: earnMoreElement.className
+                      }
+                    : { found: false }
+            })
+
+            if (earnMoreByText.found) {
+                this.bot.logger.info(
+                    this.bot.isMobile,
+                    'DAILY-SET-BROWSER',
+                    'Found "Earn more" by text search, clicking...'
+                )
+
+                // Try to click it using the text
+                await page
+                    .locator('a:has-text("Earn more"), button:has-text("Earn more")')
+                    .first()
+                    .click({ timeout: 5000 })
+                await this.bot.utils.wait(3000)
+            } else {
+                this.bot.logger.debug(
+                    this.bot.isMobile,
+                    'DAILY-SET-BROWSER',
+                    '"Earn more" button not found, continuing with visible activities'
+                )
+            }
+        } catch (error) {
+            this.bot.logger.debug(
+                this.bot.isMobile,
+                'DAILY-SET-BROWSER',
+                `Error clicking "Earn more": ${error instanceof Error ? error.message : String(error)}`
+            )
+        }
     }
 
     private async findDailySetLinks(
