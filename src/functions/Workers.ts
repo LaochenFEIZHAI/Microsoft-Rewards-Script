@@ -29,7 +29,18 @@ export class Workers {
 
         this.bot.logger.info(this.bot.isMobile, 'DAILY-SET', 'Started solving "Daily Set" items')
 
-        await this.solveActivities(activitiesUncompleted, page)
+        // Modern Dashboard: use browser automation
+        if (this.bot.rewardsVersion === 'modern') {
+            this.bot.logger.info(
+                this.bot.isMobile,
+                'DAILY-SET',
+                `Modern Dashboard detected, using browser automation | items=${activitiesUncompleted.length}`
+            )
+            await this.bot.activities.doDailySetBrowser(data, page)
+        } else {
+            // Legacy Dashboard: use API-based approach
+            await this.solveActivities(activitiesUncompleted, page)
+        }
 
         this.bot.logger.info(this.bot.isMobile, 'DAILY-SET', 'All "Daily Set" items have been completed')
     }

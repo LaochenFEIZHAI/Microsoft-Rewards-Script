@@ -15,6 +15,7 @@ import { DoubleSearchPoints } from './activities/api/DoubleSearchPoints'
 // Browser
 import { SearchOnBing } from './activities/browser/SearchOnBing'
 import { Search } from './activities/browser/Search'
+import { DailySetBrowser } from './activities/browser/DailySetBrowser'
 
 import type {
     BasePromotion,
@@ -42,12 +43,13 @@ export default class Activities {
         await searchOnBing.doSearchOnBing(promotion, page)
     }
 
+    doDailySetBrowser = async (data: DashboardData, page: Page): Promise<void> => {
+        const dailySetBrowser = new DailySetBrowser(this.bot)
+        await dailySetBrowser.doDailySetBrowser(data, page)
+    }
+
     /*
     doABC = async (page: Page): Promise<void> => {
-        const abc = new ABC(this.bot)
-        await abc.doABC(page)
-    }
-    */
 
     /*
     doPoll = async (page: Page): Promise<void> => {
