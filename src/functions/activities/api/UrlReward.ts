@@ -82,6 +82,16 @@ export class UrlReward extends Workers {
             // Wait for page to load and track visit
             await this.bot.utils.wait(3000)
 
+            // DEBUG: Pause for manual inspection (press Enter in terminal to continue)
+            if (process.env.DEBUG_URLREWARD === 'true') {
+                this.bot.logger.info(
+                    this.bot.isMobile,
+                    'URL-REWARD',
+                    '🔍 DEBUG PAUSE: Check browser window manually, then press Enter to continue...'
+                )
+                await new Promise<void>(resolve => process.stdin.once('data', resolve))
+            }
+
             // Scroll the page to simulate real user interaction
             await this.bot.mainMobilePage
                 .evaluate(() => {
